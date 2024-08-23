@@ -23,6 +23,7 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 @WebServlet(urlPatterns = "/customerController")
 public class CustomerController extends HttpServlet {
@@ -92,10 +93,17 @@ public class CustomerController extends HttpServlet {
         var customerDataProcess = new CustomerDataProcess();
 
         try (var writer = resp.getWriter()){
-            var customer = customerDataProcess.getCustomer(customerId, this.connection);
-            resp.setContentType("application/json");
-            Jsonb jsonb = JsonbBuilder.create();
-            jsonb.toJson(customer, writer);
+            if (customerId == null || customerId.isEmpty()) {
+                List<CustomerDTO> allCustomers = customerDataProcess.getAllCustomers(connection);
+                resp.setContentType("application/json");
+                Jsonb jsonb = JsonbBuilder.create();
+                jsonb.toJson(allCustomers, writer);
+            } else {
+                var customer = customerDataProcess.getCustomer(customerId, this.connection);
+                resp.setContentType("application/json");
+                Jsonb jsonb = JsonbBuilder.create();
+                jsonb.toJson(customer, writer);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -126,4 +134,6 @@ public class CustomerController extends HttpServlet {
         }
 
     }
+
+
 }

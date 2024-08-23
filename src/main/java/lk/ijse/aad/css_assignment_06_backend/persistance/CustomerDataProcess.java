@@ -13,6 +13,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class CustomerDataProcess implements CustomerData {
 
@@ -20,6 +22,7 @@ public final class CustomerDataProcess implements CustomerData {
     static String DELETE_CUSTOMER = "DELETE FROM customer WHERE id = ?";
     static String GET_CUSTOMER = "SELECT * FROM customer WHERE id = ?";
     static String UPDATE_CUSTOMER = "UPDATE customer SET name = ?, address = ?, phoneNumber = ? WHERE id = ?";
+    static String GET_ALL_CUSTOMERS = "SELECT * FROM customer";
 
     @Override
     public boolean saveCustomer(CustomerDTO customerDTO, Connection connection) throws Exception {
@@ -69,5 +72,27 @@ public final class CustomerDataProcess implements CustomerData {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public List<CustomerDTO> getAllCustomers(Connection connection) throws Exception{
+
+        List<CustomerDTO> customers = new ArrayList<>();
+
+        try {
+            var ps = connection.prepareStatement(GET_ALL_CUSTOMERS);
+            var resultSet = ps.executeQuery();
+            while (resultSet.next()){
+                CustomerDTO customerDTO = new CustomerDTO();
+                customerDTO.setId(resultSet.getString("id"));
+                customerDTO.setName(resultSet.getString("name"));
+                customerDTO.setAddress(resultSet.getString("address"));
+                customerDTO.setPhoneNumber(resultSet.getString("phoneNumber"));
+
+                customers.add(customerDTO);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return customers;
     }
 }
