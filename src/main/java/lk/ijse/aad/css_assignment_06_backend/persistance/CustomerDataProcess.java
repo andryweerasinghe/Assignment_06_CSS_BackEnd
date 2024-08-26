@@ -20,7 +20,8 @@ public final class CustomerDataProcess implements CustomerData {
 
     static String SAVE_CUSTOMER = "INSERT INTO customer (id, name, address, phoneNumber) VALUES (?,?,?,?)";
     static String DELETE_CUSTOMER = "DELETE FROM customer WHERE id = ?";
-    static String GET_CUSTOMER = "SELECT * FROM customer WHERE id = ?";
+    static String GET_CUSTOMER_BY_ID = "SELECT * FROM customer WHERE id = ?";
+    static String GET_CUSTOMER_BY_PHONE_NUMBER = "SELECT * FROM customer WHERE phoneNumber = ?";
     static String UPDATE_CUSTOMER = "UPDATE customer SET name = ?, address = ?, phoneNumber = ? WHERE id = ?";
     static String GET_ALL_CUSTOMERS = "SELECT * FROM customer";
 
@@ -56,22 +57,33 @@ public final class CustomerDataProcess implements CustomerData {
     }
 
     @Override
-    public CustomerDTO getCustomer(String id, Connection connection) throws Exception {
-        try {
-            var ps = connection.prepareStatement(GET_CUSTOMER);
-            var customerDTO = new CustomerDTO();
-            ps.setString(1, id);
-            var resultSet = ps.executeQuery();
-            while (resultSet.next()) {
-                customerDTO.setId(resultSet.getString(1));
-                customerDTO.setName(resultSet.getString(2));
-                customerDTO.setAddress(resultSet.getString(3));
-                customerDTO.setPhoneNumber(resultSet.getString(4));
-            }
-            return customerDTO;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+    public CustomerDTO getCustomerById(String id, Connection connection) throws Exception {
+        var ps = connection.prepareStatement(GET_CUSTOMER_BY_ID);
+        var customerDTO = new CustomerDTO();
+        ps.setString(1, id);
+        var resultSet = ps.executeQuery();
+        while (resultSet.next()) {
+            customerDTO.setId(resultSet.getString(1));
+            customerDTO.setName(resultSet.getString(2));
+            customerDTO.setAddress(resultSet.getString(3));
+            customerDTO.setPhoneNumber(resultSet.getString(4));
         }
+        return customerDTO;
+    }
+
+    @Override
+    public CustomerDTO getCustomerByPhoneNumber(String phoneNumber, Connection connection) throws Exception {
+        var ps = connection.prepareStatement(GET_CUSTOMER_BY_PHONE_NUMBER);
+        ps.setString(1, phoneNumber);
+        var resultSet = ps.executeQuery();
+        var customerDTO = new CustomerDTO();
+        while (resultSet.next()) {
+            customerDTO.setId(resultSet.getString(1));
+            customerDTO.setName(resultSet.getString(2));
+            customerDTO.setAddress(resultSet.getString(3));
+            customerDTO.setPhoneNumber(resultSet.getString(4));
+        }
+        return customerDTO;
     }
 
     public List<CustomerDTO> getAllCustomers(Connection connection) throws Exception{

@@ -23,6 +23,7 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 @WebServlet(urlPatterns = "/itemController")
 public class ItemsController extends HttpServlet {
@@ -65,7 +66,7 @@ public class ItemsController extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        var itemId = req.getParameter("id");
+        var itemId = req.getParameter("itemID");
         if (itemId == null || itemId.isEmpty()) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().write("Item ID is empty");
@@ -88,14 +89,22 @@ public class ItemsController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        var itemId = req.getParameter("id");
+        var itemId = req.getParameter("itemID");
         var itemDataProcess = new ItemDataProcess();
 
         try (var writer = resp.getWriter()){
-            var item = itemDataProcess.getItem(itemId, connection);
-            resp.setContentType("application/json");
-            Jsonb jsonb = JsonbBuilder.create();
-            jsonb.toJson(item, writer);
+            if (itemId == null || itemId.isEmpty()) {
+                List<ItemDTO> allItems = itemDataProcess.getAllItems(connection);
+                resp.setContentType("application/json");
+                Jsonb jsonb = JsonbBuilder.create();
+                jsonb.toJson(allItems, resp.getWriter());
+            } else {
+                var item = itemDataProcess.getItem(itemId, connection);
+                resp.setContentType("application/json");
+                Jsonb jsonb = JsonbBuilder.create();
+                jsonb.toJson(item, writer);
+            }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -106,12 +115,14 @@ public class ItemsController extends HttpServlet {
         if (!req.getContentType().toLowerCase().startsWith("application/json") || req.getContentType() == null) {
             //send error
             resp.sendError(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
+            return;
         }
         var itemDataProcess = new ItemDataProcess();
         try (var writer = resp.getWriter()){
-            var itemId = req.getParameter("id");
+//            var itemId = req.getParameter("id");
             Jsonb jsonb = JsonbBuilder.create();
             var itemDTO = jsonb.fromJson(req.getReader(), ItemDTO.class);
+            var itemId = itemDTO.getId();
             boolean updated = itemDataProcess.updateItem(itemId, itemDTO, connection);
             if (updated) {
                 writer.write("Item updated successfully");

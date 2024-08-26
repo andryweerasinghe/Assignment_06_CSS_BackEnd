@@ -13,12 +13,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class ItemDataProcess implements ItemData{
 
     static String SAVE_ITEM = "INSERT INTO item (id, name, price, qty) VALUES (?,?,?,?)";
     static String DELETE_ITEM = "DELETE FROM item WHERE id = ?";
-    static String GET_ITEM = "SELECT * FROM item WHERE id = ?";
+    static String GET_ITEM_BY_ID = "SELECT * FROM item WHERE id = ?";
+    static String GET_ALL_ITEMS = "SELECT * FROM item";
     static String UPDATE_ITEM = "UPDATE item SET name = ?, price = ?, qty = ? WHERE id = ?";
 
     @Override
@@ -54,20 +57,32 @@ public final class ItemDataProcess implements ItemData{
 
     @Override
     public ItemDTO getItem(String id, Connection connection) throws Exception {
-        try {
-            var ps = connection.prepareStatement(GET_ITEM);
-            ItemDTO itemDTO = new ItemDTO();
-            ps.setString(1, id);
-            var resultSet = ps.executeQuery();
-            while (resultSet.next()) {
-                itemDTO.setId(resultSet.getString(1));
-                itemDTO.setName(resultSet.getString(2));
-                itemDTO.setPrice(resultSet.getString(3));
-                itemDTO.setQty(resultSet.getString(4));
-            }
-            return itemDTO;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        var ps = connection.prepareStatement(GET_ITEM_BY_ID);
+        ItemDTO itemDTO = new ItemDTO();
+        ps.setString(1, id);
+        var resultSet = ps.executeQuery();
+        while (resultSet.next()) {
+            itemDTO.setId(resultSet.getString(1));
+            itemDTO.setName(resultSet.getString(2));
+            itemDTO.setPrice(resultSet.getString(3));
+            itemDTO.setQty(resultSet.getString(4));
         }
+        return itemDTO;
+    }
+
+    public List<ItemDTO> getAllItems(Connection connection) throws Exception {
+        List<ItemDTO> itemDTOS = new ArrayList<>();
+
+        var ps = connection.prepareStatement(GET_ALL_ITEMS);
+        var resultSet = ps.executeQuery();
+        while (resultSet.next()) {
+            ItemDTO itemDTO = new ItemDTO();
+            itemDTO.setId(resultSet.getString(1));
+            itemDTO.setName(resultSet.getString(2));
+            itemDTO.setPrice(resultSet.getString(3));
+            itemDTO.setQty(resultSet.getString(4));
+            itemDTOS.add(itemDTO);
+        }
+        return itemDTOS;
     }
 }
