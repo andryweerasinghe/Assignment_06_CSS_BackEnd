@@ -12,4 +12,5 @@ public sealed interface ItemData permits ItemDataProcess{
     boolean updateItem (String id, ItemDTO itemDTO, Connection connection) throws Exception;
     ItemDTO getItem (String id, Connection connection) throws Exception;
     List<ItemDTO> getAllItems(Connection connection) throws Exception;
+    boolean updateItemQuantity(String id, String qty, Connection connection) throws Exception;
 }

@@ -23,6 +23,7 @@ public final class ItemDataProcess implements ItemData{
     static String GET_ITEM_BY_ID = "SELECT * FROM item WHERE id = ?";
     static String GET_ALL_ITEMS = "SELECT * FROM item";
     static String UPDATE_ITEM = "UPDATE item SET name = ?, price = ?, qty = ? WHERE id = ?";
+    static String UPDATE_ITEM_QUANTITY = "UPDATE item SET qty = ? WHERE id = ?";
 
     @Override
     public boolean saveItem(ItemDTO itemDTO, Connection connection) throws Exception {
@@ -52,6 +53,13 @@ public final class ItemDataProcess implements ItemData{
         ps.setString(2, itemDTO.getPrice());
         ps.setString(3, itemDTO.getQty());
         ps.setString(4, id);
+        return ps.executeUpdate() != 0;
+    }
+
+    public boolean updateItemQuantity(String id, String qty, Connection connection) throws Exception {
+        var ps = connection.prepareStatement(UPDATE_ITEM_QUANTITY);
+        ps.setString(1, qty);
+        ps.setString(2, id);
         return ps.executeUpdate() != 0;
     }
 

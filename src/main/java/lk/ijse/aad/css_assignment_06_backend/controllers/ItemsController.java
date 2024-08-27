@@ -121,14 +121,28 @@ public class ItemsController extends HttpServlet {
 //            var itemId = req.getParameter("id");
             Jsonb jsonb = JsonbBuilder.create();
             var itemDTO = jsonb.fromJson(req.getReader(), ItemDTO.class);
-            var itemId = itemDTO.getId();
-            boolean updated = itemDataProcess.updateItem(itemId, itemDTO, connection);
-            if (updated) {
-                writer.write("Item updated successfully");
-                resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            if ((itemDTO.getName() == null || itemDTO.getName().isEmpty()) && (itemDTO.getPrice() == null || itemDTO.getPrice().isEmpty())) {
+                System.out.println("Item name or price is empty");
+                String id = itemDTO.getId();
+                String qty = itemDTO.getQty();
+                boolean updated = itemDataProcess.updateItemQuantity(id, qty, connection);
+                if (updated) {
+                    writer.write("Item Quantity updated successfully");
+                    resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+                } else {
+                    writer.write("Error while updating item quantity");
+                    resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                }
             } else {
-                writer.write("Error while updating item");
-                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                var itemId = itemDTO.getId();
+                boolean updated = itemDataProcess.updateItem(itemId, itemDTO, connection);
+                if (updated) {
+                    writer.write("Item updated successfully");
+                    resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+                } else {
+                    writer.write("Error while updating item");
+                    resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

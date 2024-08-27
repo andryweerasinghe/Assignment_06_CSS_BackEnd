@@ -23,7 +23,10 @@ public class OrderDataProcess implements OrderData{
     static String GET_ORDER_DETAILS = "SELECT o.orderId, od.itemId, i.name AS itemName, i.price AS unitPrice, i.qty AS qtyOnHand, od.orderQty AS qty, o.orderDate, o.customerId, o.totalPrice FROM orders o JOIN orderDetails od ON o.orderId = od.orderId JOIN item i ON od.itemId = i.id";
     static String DELETE_ORDER = "DELETE FROM orders WHERE orderId = ?";
     static String DELETE_ORDER_DETAILS = "DELETE FROM orderDetails WHERE orderId = ?";
+    static String UPDATE_ORDER = "UPDATE orders SET customerId = ?, orderDate = ?, totalPrice = ? WHERE orderId = ?";
+    static String UPDATE_ORDER_DETAILS = "UPDATE orderDetails SET itemId = ?, orderQty = ? WHERE orderId = ?";
 
+    @Override
     public boolean saveOrder(OrderDTO orderDTO, Connection connection) throws Exception{
         var ps = connection.prepareStatement(SAVE_ORDER);
         ps.setString(1, orderDTO.getOrderId());
@@ -33,6 +36,7 @@ public class OrderDataProcess implements OrderData{
         return ps.executeUpdate() != 0;
     }
 
+    @Override
     public boolean saveOrderDetails(OrderDetailDTO orderDetailDTO, Connection connection) throws Exception{
         var ps = connection.prepareStatement(SAVE_ORDER_DETAILS);
         ps.setString(1, orderDetailDTO.getOrderId());
@@ -41,6 +45,7 @@ public class OrderDataProcess implements OrderData{
         return ps.executeUpdate() != 0;
     }
 
+    @Override
     public boolean deleteOrder(String orderId, Connection connection) throws Exception{
         try {
             var ps = connection.prepareStatement(DELETE_ORDER);
@@ -52,6 +57,7 @@ public class OrderDataProcess implements OrderData{
         return false;
     }
 
+    @Override
     public boolean deleteOrderDetails(String orderId, Connection connection) throws Exception{
         try {
             var ps = connection.prepareStatement(DELETE_ORDER_DETAILS);
@@ -63,6 +69,7 @@ public class OrderDataProcess implements OrderData{
         return false;
     }
 
+    @Override
     public List<OrderDetailDTO> getOrderDetails(Connection connection) throws Exception {
         List<OrderDetailDTO> orderDetailDTOS = new ArrayList<>();
 
@@ -91,6 +98,25 @@ public class OrderDataProcess implements OrderData{
         }
 
         return orderDetailDTOS;
+    }
+
+    @Override
+    public boolean updateOrder(String orderId, OrderDTO orderDTO, Connection connection) throws Exception{
+        var ps = connection.prepareStatement(UPDATE_ORDER);
+        ps.setString(1, orderDTO.getCustomerId());
+        ps.setString(2, orderDTO.getOrderDate());
+        ps.setString(3, orderDTO.getTotalPrice());
+        ps.setString(4, orderId);
+        return ps.executeUpdate() != 0;
+    }
+
+    @Override
+    public boolean updateOrderDetails(String orderId, OrderDetailDTO orderDetailDTO, Connection connection) throws Exception{
+        var ps = connection.prepareStatement(UPDATE_ORDER_DETAILS);
+        ps.setString(1, orderDetailDTO.getItemId());
+        ps.setString(2, orderDetailDTO.getOrderQuantity());
+        ps.setString(3, orderDetailDTO.getOrderId());
+        return ps.executeUpdate() != 0;
     }
 
 }

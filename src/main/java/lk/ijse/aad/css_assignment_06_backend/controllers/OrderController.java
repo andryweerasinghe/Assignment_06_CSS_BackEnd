@@ -125,4 +125,49 @@ public class OrderController extends HttpServlet {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        if (!req.getContentType().toLowerCase().startsWith("application/json") || req.getContentType() == null) {
+            //send error
+            resp.sendError(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
+            return;
+        }
+        var orderDataProcess = new OrderDataProcess();
+        try (var writer = resp.getWriter()){
+            Jsonb jsonb = JsonbBuilder.create();
+            var combinedOrderDTO = jsonb.fromJson(req.getReader(), CombinedOrderDTO.class);
+
+            var orderId = combinedOrderDTO.getOrderId();
+            var customerId = combinedOrderDTO.getCustomerId();
+            var orderDate = combinedOrderDTO.getOrderDate();
+            var totalPrice = combinedOrderDTO.getTotalPrice();
+            var itemId = combinedOrderDTO.getItemId();
+            var orderQty = combinedOrderDTO.getOrderQty();
+
+            OrderDTO orderDTO = new OrderDTO();
+            orderDTO.setOrderId(orderId);
+            orderDTO.setCustomerId(customerId);
+            orderDTO.setOrderDate(orderDate);
+            orderDTO.setTotalPrice(totalPrice);
+
+            OrderDetailDTO orderDetailDTO = new OrderDetailDTO();
+            orderDetailDTO.setOrderId(orderId);
+            orderDetailDTO.setItemId(itemId);
+            orderDetailDTO.setOrderQuantity(orderQty);
+
+            boolean updatedOrder = orderDataProcess.updateOrder(orderId, orderDTO, connection);
+            boolean updatedOrderDetails = orderDataProcess.updateOrderDetails(orderId, orderDetailDTO, connection);
+
+            if (updatedOrder && updatedOrderDetails) {
+                writer.write("Order updated successfully");
+                resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            } else {
+                writer.write("Order not updated");
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
