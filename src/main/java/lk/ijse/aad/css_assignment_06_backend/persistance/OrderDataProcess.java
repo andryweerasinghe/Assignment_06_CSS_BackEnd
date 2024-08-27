@@ -11,6 +11,7 @@ import lk.ijse.aad.css_assignment_06_backend.dto.OrderDTO;
 import lk.ijse.aad.css_assignment_06_backend.dto.OrderDetailDTO;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,8 @@ public class OrderDataProcess implements OrderData{
     static String SAVE_ORDER = "INSERT INTO orders (orderId, customerId, orderDate, totalPrice) VALUES (?,?,?,?)";
     static String SAVE_ORDER_DETAILS = "INSERT INTO orderDetails (orderId, itemId, orderQty) VALUES (?,?,?)";
     static String GET_ORDER_DETAILS = "SELECT o.orderId, od.itemId, i.name AS itemName, i.price AS unitPrice, i.qty AS qtyOnHand, od.orderQty AS qty, o.orderDate, o.customerId, o.totalPrice FROM orders o JOIN orderDetails od ON o.orderId = od.orderId JOIN item i ON od.itemId = i.id";
-
+    static String DELETE_ORDER = "DELETE FROM orders WHERE orderId = ?";
+    static String DELETE_ORDER_DETAILS = "DELETE FROM orderDetails WHERE orderId = ?";
 
     public boolean saveOrder(OrderDTO orderDTO, Connection connection) throws Exception{
         var ps = connection.prepareStatement(SAVE_ORDER);
@@ -37,6 +39,28 @@ public class OrderDataProcess implements OrderData{
         ps.setString(2, orderDetailDTO.getItemId());
         ps.setString(3, orderDetailDTO.getOrderQuantity());
         return ps.executeUpdate() != 0;
+    }
+
+    public boolean deleteOrder(String orderId, Connection connection) throws Exception{
+        try {
+            var ps = connection.prepareStatement(DELETE_ORDER);
+            ps.setString(1, orderId);
+            return ps.executeUpdate() != 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean deleteOrderDetails(String orderId, Connection connection) throws Exception{
+        try {
+            var ps = connection.prepareStatement(DELETE_ORDER_DETAILS);
+            ps.setString(1, orderId);
+            return ps.executeUpdate() != 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public List<OrderDetailDTO> getOrderDetails(Connection connection) throws Exception {

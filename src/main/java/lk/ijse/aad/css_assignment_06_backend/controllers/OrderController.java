@@ -100,4 +100,29 @@ public class OrderController extends HttpServlet {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        var orderId = req.getParameter("orderId");
+        if (orderId == null || orderId.isEmpty()) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write("Order ID is required");
+            return;
+        }
+        var orderDataProcess = new OrderDataProcess();
+        try (var writer = resp.getWriter()){
+            boolean deleted2 = orderDataProcess.deleteOrderDetails(orderId, connection);
+            boolean deleted = orderDataProcess.deleteOrder(orderId, connection);
+
+            if (deleted && deleted2) {
+                writer.write("Order deleted successfully");
+                resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            } else {
+                writer.write("Order not deleted");
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

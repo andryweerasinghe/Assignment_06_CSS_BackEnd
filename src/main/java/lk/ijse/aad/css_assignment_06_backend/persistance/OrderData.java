@@ -10,4 +10,6 @@ public interface OrderData {
     boolean saveOrder(OrderDTO orderDTO, Connection connection) throws Exception;
     boolean saveOrderDetails(OrderDetailDTO orderDetailDTO, Connection connection) throws Exception;
     List<OrderDetailDTO> getOrderDetails(Connection connection) throws Exception;
+    boolean deleteOrder(String orderId, Connection connection) throws Exception;
+    boolean deleteOrderDetails(String orderId, Connection connection) throws Exception;
 }
