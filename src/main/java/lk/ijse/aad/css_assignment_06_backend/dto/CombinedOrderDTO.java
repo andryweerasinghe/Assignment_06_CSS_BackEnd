@@ -1,7 +1,7 @@
 /*
  * Author  : Mr.electrix
  * Project : CSS_Assignment_06_BackEnd
- * Date    : 8/26/24
+ * Date    : 8/27/24
 
  */
 
@@ -13,13 +13,16 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
-public class OrderDTO implements Serializable {
+public class CombinedOrderDTO implements Serializable {
     private String orderId;
     private String customerId;
     private String orderDate;
     private String totalPrice;
+    private String itemId;
+    private String orderQty;
+
 
 }

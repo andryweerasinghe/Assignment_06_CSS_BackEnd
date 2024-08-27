@@ -89,22 +89,21 @@ public class ItemsController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        var itemId = req.getParameter("itemID");
+        var itemId = req.getParameter("id");
         var itemDataProcess = new ItemDataProcess();
 
         try (var writer = resp.getWriter()){
-            if (itemId == null || itemId.isEmpty()) {
-                List<ItemDTO> allItems = itemDataProcess.getAllItems(connection);
-                resp.setContentType("application/json");
-                Jsonb jsonb = JsonbBuilder.create();
-                jsonb.toJson(allItems, resp.getWriter());
-            } else {
+            if (itemId != null) {
                 var item = itemDataProcess.getItem(itemId, connection);
                 resp.setContentType("application/json");
                 Jsonb jsonb = JsonbBuilder.create();
                 jsonb.toJson(item, writer);
+            } else {
+                List<ItemDTO> allItems = itemDataProcess.getAllItems(connection);
+                resp.setContentType("application/json");
+                Jsonb jsonb = JsonbBuilder.create();
+                jsonb.toJson(allItems, resp.getWriter());
             }
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
